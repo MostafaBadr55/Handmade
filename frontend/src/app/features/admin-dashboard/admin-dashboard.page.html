@@ -1,0 +1,383 @@
+<div class="admin-dashboard">
+  <div class="admin-header">
+    <h1>
+      <span class="material-symbols-outlined">admin_panel_settings</span>
+      {{ 'admin.dashboard' | t }}
+    </h1>
+    <a routerLink="/" class="back-btn">
+      <span class="material-symbols-outlined">arrow_back</span>
+      {{ 'admin.backToSite' | t }}
+    </a>
+  </div>
+
+  <!-- Alerts -->
+  <div *ngIf="error()" class="alert alert-error">
+    <span class="material-symbols-outlined">error</span>
+    {{ error() }}
+    <button (click)="error.set(null)">&times;</button>
+  </div>
+  <div *ngIf="success()" class="alert alert-success">
+    <span class="material-symbols-outlined">check_circle</span>
+    {{ success() }}
+    <button (click)="success.set(null)">&times;</button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button [class.active]="activeTab() === 'shops'" (click)="setActiveTab('shops')">
+      <span class="material-symbols-outlined">storefront</span>
+      {{ 'admin.shops' | t }}
+    </button>
+    <button [class.active]="activeTab() === 'products'" (click)="setActiveTab('products')">
+      <span class="material-symbols-outlined">inventory_2</span>
+      {{ 'admin.products' | t }}
+    </button>
+    <button [class.active]="activeTab() === 'users'" (click)="setActiveTab('users')">
+      <span class="material-symbols-outlined">group</span>
+      {{ 'admin.users' | t }}
+    </button>
+    <button [class.active]="activeTab() === 'categories'" (click)="setActiveTab('categories')">
+      <span class="material-symbols-outlined">category</span>
+      {{ 'admin.categories' | t }}
+    </button>
+    <button [class.active]="activeTab() === 'subcategories'" (click)="setActiveTab('subcategories')">
+      <span class="material-symbols-outlined">sell</span>
+      {{ 'admin.subcategories' | t }}
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading()" class="loading">
+    <div class="spinner"></div>
+    {{ 'common.loading' | t }}
+  </div>
+
+  <!-- SHOPS TAB -->
+  <div *ngIf="activeTab() === 'shops' && !loading()" class="tab-content">
+    <div class="section">
+      <h2>{{ 'admin.pendingShops' | t }} ({{ pendingShops().length }})</h2>
+      <div class="table-container" *ngIf="pendingShops().length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th>{{ 'admin.id' | t }}</th>
+              <th>{{ 'common.name' | t }}</th>
+              <th>{{ 'admin.owner' | t }}</th>
+              <th>{{ 'common.status' | t }}</th>
+              <th>{{ 'common.actions' | t }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let shop of pendingShops()">
+              <td>{{ shop.shopId || shop.id }}</td>
+              <td>{{ shop.shopName || shop.name }}</td>
+              <td>{{ shop.ownerUserName }}</td>
+              <td><span class="badge pending">{{ shop.status }}</span></td>
+              <td class="actions">
+                <button class="btn-approve" (click)="approveShop(shop.shopId || shop.id)">
+                  <span class="material-symbols-outlined">check</span>
+                </button>
+                <button class="btn-reject" (click)="openRejectShopModal(shop.shopId || shop.id)">
+                  <span class="material-symbols-outlined">close</span>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p *ngIf="pendingShops().length === 0" class="empty">{{ 'admin.noPendingShops' | t }}</p>
+    </div>
+
+    <div class="section">
+      <h2>{{ 'admin.allShops' | t }}</h2>
+      <div class="filters-bar">
+        <div class="filter-group">
+          <label>{{ 'admin.searchByName' | t }}</label>
+          <input type="text" [placeholder]="i18n.t('admin.searchByName')" 
+                 [ngModel]="shopFilters().Name" 
+                 (ngModelChange)="updateShopName($event)">
+        </div>
+        <div class="filter-group">
+          <label>{{ 'common.status' | t }}</label>
+          <select [ngModel]="shopFilters().Status" 
+                  (ngModelChange)="updateShopStatus($event)">
+            <option value="">{{ 'admin.allStatus' | t }}</option>
+            <option value="Active">{{ 'common.active' | t }}</option>
+            <option value="Pending">{{ 'common.pending' | t }}</option>
+            <option value="Rejected">{{ 'common.rejected' | t }}</option>
+            <option value="Suspended">{{ lang() === 'ar' ? 'معلق' : 'Suspended' }}</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-container" *ngIf="shops().length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th>{{ 'admin.id' | t }}</th>
+              <th>{{ 'common.name' | t }}</th>
+              <th>{{ 'admin.owner' | t }}</th>
+              <th>{{ 'common.status' | t }}</th>
+              <th>{{ 'common.actions' | t }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let shop of shops()">
+              <td>{{ shop.shopId || shop.id }}</td>
+              <td>{{ shop.shopName || shop.name }}</td>
+              <td>{{ shop.ownerUserName }}</td>
+              <td>
+                <span class="badge" [ngClass]="shop.status?.toLowerCase()">{{ shop.status }}</span>
+              </td>
+              <td class="actions">
+                <button *ngIf="shop.status !== 'Active'" class="btn-approve" (click)="approveShop(shop.shopId || shop.id)">
+                  <span class="material-symbols-outlined">check</span>
+                </button>
+                <button *ngIf="shop.status !== 'Rejected'" class="btn-reject" (click)="openRejectShopModal(shop.shopId || shop.id)">
+                  <span class="material-symbols-outlined">close</span>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p *ngIf="shops().length === 0" class="empty">{{ 'admin.noShopsFound' | t }}</p>
+    </div>
+  </div>
+
+  <!-- PRODUCTS TAB -->
+  <div *ngIf="activeTab() === 'products' && !loading()" class="tab-content">
+    <div class="section">
+      <h2>{{ 'admin.products' | t }}</h2>
+      <div class="filters-bar">
+        <div class="filter-group">
+          <label>{{ 'admin.approval' | t }}</label>
+          <select [ngModel]="productFilters().ApprovalStatus"
+                  (ngModelChange)="updateProductApprovalStatus($event)">
+            <option value="">{{ 'admin.allApprovalStatus' | t }}</option>
+            <option value="Pending">{{ 'common.pending' | t }}</option>
+            <option value="Approved">{{ 'common.approved' | t }}</option>
+            <option value="Rejected">{{ 'common.rejected' | t }}</option>
+          </select>
+        </div>
+        <div class="filter-group" *ngIf="productFilters().ApprovalStatus === 'Approved'">
+          <label>{{ 'common.status' | t }}</label>
+          <select [ngModel]="productFilters().Status"
+                  (ngModelChange)="updateProductStatus($event)">
+            <option value="">{{ 'admin.allStatus' | t }}</option>
+            <option value="Active">{{ 'common.active' | t }}</option>
+            <option value="InActive">{{ 'common.inactive' | t }}</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-container" *ngIf="products().length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th>{{ 'admin.id' | t }}</th>
+              <th>{{ 'admin.title' | t }}</th>
+              <th>{{ 'common.price' | t }}</th>
+              <th>{{ 'common.status' | t }}</th>
+              <th>{{ 'admin.approval' | t }}</th>
+              <th>{{ 'common.actions' | t }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let product of products()">
+              <td>{{ product.id || product.productId }}</td>
+              <td>{{ product.title || product.name }}</td>
+              <td>{{ product.price | currency }}</td>
+              <td><span class="badge" [ngClass]="product.status?.toLowerCase()">{{ product.status }}</span></td>
+              <td><span class="badge" [ngClass]="product.approvalStatus?.toLowerCase()">{{ product.approvalStatus }}</span></td>
+              <td class="actions">
+                <button *ngIf="product.approvalStatus !== 'Approved'" class="btn-approve" (click)="approveProduct(product.id || product.productId)">
+                  <span class="material-symbols-outlined">check</span>
+                </button>
+                <button *ngIf="product.approvalStatus !== 'Rejected'" class="btn-reject" (click)="openRejectProductModal(product.id || product.productId)">
+                  <span class="material-symbols-outlined">close</span>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p *ngIf="products().length === 0" class="empty">{{ 'admin.noProductsFound' | t }}</p>
+    </div>
+  </div>
+
+  <!-- USERS TAB -->
+  <div *ngIf="activeTab() === 'users' && !loading()" class="tab-content">
+    <div class="section">
+      <h2>{{ 'admin.assignRole' | t }}</h2>
+      <div class="form-card">
+        <div class="form-group">
+          <label>{{ lang() === 'ar' ? 'اسم المستخدم' : 'Username' }}</label>
+          <input type="text" [placeholder]="i18n.t('admin.enterUsername')"
+                 [ngModel]="assignRoleData().userName"
+                 (ngModelChange)="updateAssignRoleUserName($event)">
+        </div>
+        <div class="form-group">
+          <label>{{ lang() === 'ar' ? 'الدور' : 'Role Name' }}</label>
+          <select [ngModel]="assignRoleData().roleName"
+                  (ngModelChange)="updateAssignRoleRoleName($event)">
+            <option value="">{{ 'admin.selectRole' | t }}</option>
+            <option value="Buyer">{{ 'role.buyer' | t }}</option>
+            <option value="Seller">{{ 'role.seller' | t }}</option>
+            <option value="Admin">{{ lang() === 'ar' ? 'مدير' : 'Admin' }}</option>
+            <option value="SuperAdmin">{{ lang() === 'ar' ? 'مدير أعلى' : 'Super Admin' }}</option>
+          </select>
+        </div>
+        <button class="btn-primary" (click)="assignRole()">{{ 'admin.assignRole' | t }}</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CATEGORIES TAB -->
+  <div *ngIf="activeTab() === 'categories' && !loading()" class="tab-content">
+    <div class="section">
+      <h2>{{ editingCategory() ? ('admin.editCategory' | t) : ('admin.addCategory' | t) }}</h2>
+      <div class="form-card">
+        <div class="form-group">
+          <label>{{ 'common.name' | t }} *</label>
+          <input type="text" [placeholder]="i18n.t('admin.categoryName')"
+                 [ngModel]="categoryForm().name"
+                 (ngModelChange)="updateCategoryName($event)">
+        </div>
+        <div class="form-group">
+          <label>{{ 'common.description' | t }}</label>
+          <textarea [placeholder]="i18n.t('common.description')"
+                    [ngModel]="categoryForm().description"
+                    (ngModelChange)="updateCategoryDescription($event)"></textarea>
+        </div>
+        <div class="form-group">
+          <label>{{ lang() === 'ar' ? 'صورة التصنيف' : 'Category Image' }}</label>
+          <input type="file" accept="image/*" (change)="onCategoryFileChange($event)">
+          <div class="image-preview" *ngIf="categoryForm().imageUrl && categoryForm().imageUrl.length > 0">
+            <img [src]="categoryForm().imageUrl" alt="Preview" style="max-width: 150px; max-height: 150px; margin-top: 8px; border-radius: 8px;">
+          </div>
+          <span *ngIf="uploadInProgress()" class="upload-status">{{ lang() === 'ar' ? 'جاري الرفع...' : 'Uploading...' }}</span>
+        </div>
+        <div class="form-actions">
+          <button class="btn-primary" (click)="saveCategory()">
+            {{ editingCategory() ? ('common.update' | t) : ('common.create' | t) }}
+          </button>
+          <button *ngIf="editingCategory()" class="btn-secondary" (click)="resetCategoryForm()">{{ 'common.cancel' | t }}</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>{{ lang() === 'ar' ? 'جميع التصنيفات' : 'All Categories' }}</h2>
+      <div class="table-container" *ngIf="categories().length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th>{{ 'admin.id' | t }}</th>
+              <th>{{ 'common.name' | t }}</th>
+              <th>{{ 'common.description' | t }}</th>
+              <th>{{ 'common.actions' | t }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let cat of categories()">
+              <td>{{ cat.id || cat.categoryId }}</td>
+              <td>{{ cat.name }}</td>
+              <td>{{ cat.description || '-' }}</td>
+              <td class="actions">
+                <button class="btn-edit" (click)="editCategory(cat)">
+                  <span class="material-symbols-outlined">edit</span>
+                </button>
+                <button class="btn-delete" (click)="deleteCategory(cat.id || cat.categoryId)">
+                  <span class="material-symbols-outlined">delete</span>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p *ngIf="categories().length === 0" class="empty">{{ 'admin.noCategoriesFound' | t }}</p>
+    </div>
+  </div>
+
+  <!-- SUBCATEGORIES TAB -->
+  <div *ngIf="activeTab() === 'subcategories' && !loading()" class="tab-content">
+    <div class="section">
+      <h2>{{ editingSubCategory() ? ('admin.editSubcategory' | t) : ('admin.addSubcategory' | t) }}</h2>
+      <div class="form-card">
+        <div class="form-group">
+          <label>{{ lang() === 'ar' ? 'التصنيف' : 'Category' }} *</label>
+          <select [ngModel]="subCategoryForm().categoryId"
+                  (ngModelChange)="updateSubCategoryCategoryId($event)">
+            <option [value]="0">{{ lang() === 'ar' ? 'اختر التصنيف' : 'Select Category' }}</option>
+            <option *ngFor="let cat of categories()" [value]="cat.id || cat.categoryId">{{ cat.name }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>{{ 'common.name' | t }} *</label>
+          <input type="text" [placeholder]="i18n.t('admin.subcategoryName')"
+                 [ngModel]="subCategoryForm().name"
+                 (ngModelChange)="updateSubCategoryName($event)">
+        </div>
+        <div class="form-actions">
+          <button class="btn-primary" (click)="saveSubCategory()">
+            {{ editingSubCategory() ? ('common.update' | t) : ('common.create' | t) }}
+          </button>
+          <button *ngIf="editingSubCategory()" class="btn-secondary" (click)="resetSubCategoryForm()">{{ 'common.cancel' | t }}</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>{{ lang() === 'ar' ? 'جميع التصنيفات الفرعية' : 'All SubCategories' }}</h2>
+      <div class="table-container" *ngIf="subCategories().length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th>{{ 'admin.id' | t }}</th>
+              <th>{{ 'common.name' | t }}</th>
+              <th>{{ 'admin.categoryId' | t }}</th>
+              <th>{{ 'common.actions' | t }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let sub of subCategories()">
+              <td>{{ sub.id }}</td>
+              <td>{{ sub.name }}</td>
+              <td>{{ sub.categoryId }}</td>
+              <td class="actions">
+                <button class="btn-edit" (click)="editSubCategory(sub)">
+                  <span class="material-symbols-outlined">edit</span>
+                </button>
+                <button class="btn-delete" (click)="deleteSubCategory(sub.id)">
+                  <span class="material-symbols-outlined">delete</span>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p *ngIf="subCategories().length === 0" class="empty">{{ 'admin.noSubcategoriesFound' | t }}</p>
+    </div>
+  </div>
+
+  <!-- REJECT MODAL -->
+  <div class="modal-overlay" *ngIf="showRejectModal()">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>{{ rejectType() === 'shop' ? ('admin.rejectShop' | t) : ('admin.rejectProduct' | t) }}</h3>
+        <button class="close-btn" (click)="showRejectModal.set(false)">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>{{ 'admin.rejectionMessage' | t }}</label>
+          <textarea [placeholder]="i18n.t('admin.enterRejectionReason')"
+                    [ngModel]="rejectMessage()"
+                    (ngModelChange)="updateRejectMessage($event)"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="showRejectModal.set(false)">{{ 'common.cancel' | t }}</button>
+        <button class="btn-reject-confirm" (click)="confirmReject()">{{ 'admin.reject' | t }}</button>
+      </div>
+    </div>
+  </div>
+</div>

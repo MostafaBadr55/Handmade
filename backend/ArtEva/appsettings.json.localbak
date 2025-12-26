@@ -1,0 +1,22 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "Jwt": {
+    "Key": "YourSuperSecretKeyThatIsAtLeast32CharactersLong! @#$",
+    "Issuer": "ArtEvaAPI",
+    "Audience": "ArtEvaClient",
+    "ExpiryInMinutes": 120
+  },
+"ConnectionStrings": {
+  "ArtCs": "Data Source=localhost;Initial Catalog=ArtEva;User ID=sa;Password=Sohaila2025@;TrustServerCertificate=True;MultipleActiveResultSets=True;"
+},
+  "UploadSettings": {
+    "BaseUrl": "http://localhost:5000",
+    "Root": "wwwroot/uploads"
+  }
+}

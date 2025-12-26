@@ -1,0 +1,70 @@
+<div class="landing-container">
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1>{{ 'landing.hero.title' | t }}</h1>
+        <p class="subtitle">{{ 'landing.hero.subtitle' | t }}</p>
+        
+        <div class="search-bar-large">
+          <span class="material-symbols-outlined search-icon">search</span>
+          <input type="text" [placeholder]="i18n.t('landing.searchPlaceholder')">
+          <button class="search-btn">
+            <span class="material-symbols-outlined">center_focus_weak</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="hero-cards">
+        <!-- Card 1: Festive Frames -->
+        <div class="hero-card festive-card">
+          <div class="card-images">
+            <div class="img-main"></div>
+            <div class="img-sub-top"></div>
+            <div class="img-sub-bottom"></div>
+          </div>
+          <div class="card-info">
+            <h3>{{ 'landing.festiveTitle' | t }}</h3>
+            <p>55 {{ 'landing.images' | t }}</p>
+          </div>
+        </div>
+
+        <!-- Card 2: Contribute -->
+        <div class="hero-card contribute-card">
+          <div class="contribute-content">
+            <h3>{{ 'landing.contributeTitle' | t }}</h3>
+            <div class="contribute-visuals">
+              <div class="visual-item v1"></div>
+              <div class="visual-item v2"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Products Section -->
+  <section class="products-section">
+    <div class="products-grid" *ngIf="products().length > 0; else noProducts">
+      <div *ngFor="let product of products()" class="product-card">
+        <img [src]="product.imageUrl || 'assets/placeholder.png'" [alt]="product.title" onerror="this.src='assets/placeholder.png'">
+        <div class="product-overlay">
+          <div class="overlay-top">
+            <span class="material-symbols-outlined">favorite</span>
+            <span class="material-symbols-outlined">add</span>
+          </div>
+          <div class="overlay-bottom">
+            <div class="user-info">
+              <div class="user-avatar"></div>
+              <span>{{ product.title }}</span>
+            </div>
+            <span class="material-symbols-outlined">download</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ng-template #noProducts>
+      <p class="no-data">{{ 'landing.noProducts' | t }}</p>
+    </ng-template>
+  </section>
+</div>
