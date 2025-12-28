@@ -1,0 +1,140 @@
+<div class="products-page">
+  <div class="page-header">
+    <h1>
+      <span class="material-symbols-outlined">inventory_2</span>
+      {{ lang() === 'ar' ? 'المنتجات' : 'Products' }}
+    </h1>
+  </div>
+
+  <!-- Filters Section -->
+  <div class="filters-section">
+    <div class="filters-row">
+      <!-- Category -->
+      <div class="filter-group">
+        <label>{{ lang() === 'ar' ? 'التصنيف' : 'Category' }}</label>
+        <select [ngModel]="filters().CategoryId" (ngModelChange)="updateCategory($event)">
+          <option [value]="null">{{ lang() === 'ar' ? 'كل التصنيفات' : 'All Categories' }}</option>
+          <option *ngFor="let cat of categories()" [value]="cat.id">
+            {{ lang() === 'ar' ? cat.nameAr : cat.nameEn }}
+          </option>
+        </select>
+      </div>
+
+      <!-- SubCategory -->
+      <div class="filter-group" *ngIf="subCategories().length > 0">
+        <label>{{ lang() === 'ar' ? 'التصنيف الفرعي' : 'SubCategory' }}</label>
+        <select [ngModel]="filters().SubCategoryId" (ngModelChange)="updateSubCategory($event)">
+          <option [value]="null">{{ lang() === 'ar' ? 'الكل' : 'All' }}</option>
+          <option *ngFor="let sub of subCategories()" [value]="sub.id">
+            {{ lang() === 'ar' ? sub.nameAr : sub.nameEn }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Search -->
+      <div class="filter-group search-group">
+        <label>{{ lang() === 'ar' ? 'بحث' : 'Search' }}</label>
+        <input type="text" 
+               [placeholder]="lang() === 'ar' ? 'ابحث عن منتج...' : 'Search products...'"
+               [ngModel]="filters().Search"
+               (ngModelChange)="updateSearch($event)">
+      </div>
+
+      <!-- Min Price -->
+      <div class="filter-group">
+        <label>{{ lang() === 'ar' ? 'أقل سعر' : 'Min Price' }}</label>
+        <input type="number" 
+               [placeholder]="lang() === 'ar' ? '0' : '0'"
+               [ngModel]="filters().MinPrice"
+               (ngModelChange)="updateMinPrice($event)">
+      </div>
+
+      <!-- Max Price -->
+      <div class="filter-group">
+        <label>{{ lang() === 'ar' ? 'أعلى سعر' : 'Max Price' }}</label>
+        <input type="number" 
+               [placeholder]="lang() === 'ar' ? '1000' : '1000'"
+               [ngModel]="filters().MaxPrice"
+               (ngModelChange)="updateMaxPrice($event)">
+      </div>
+
+      <!-- Sort By -->
+      <div class="filter-group">
+        <label>{{ lang() === 'ar' ? 'ترتيب حسب' : 'Sort By' }}</label>
+        <select [ngModel]="filters().SortBy" (ngModelChange)="updateSortBy($event)">
+          <option value="">{{ lang() === 'ar' ? 'افتراضي' : 'Default' }}</option>
+          <option value="Price">{{ lang() === 'ar' ? 'السعر' : 'Price' }}</option>
+          <option value="Title">{{ lang() === 'ar' ? 'الاسم' : 'Name' }}</option>
+          <option value="CreatedAt">{{ lang() === 'ar' ? 'الأحدث' : 'Newest' }}</option>
+        </select>
+      </div>
+
+      <!-- Sort Direction -->
+      <div class="filter-group">
+        <label>{{ lang() === 'ar' ? 'الاتجاه' : 'Direction' }}</label>
+        <select [ngModel]="filters().SortDirection" (ngModelChange)="updateSortDirection($event)">
+          <option value="">{{ lang() === 'ar' ? 'تصاعدي' : 'Ascending' }}</option>
+          <option value="Asc">{{ lang() === 'ar' ? 'تصاعدي' : 'Ascending' }}</option>
+          <option value="Desc">{{ lang() === 'ar' ? 'تنازلي' : 'Descending' }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="filters-actions">
+      <button class="btn-apply" (click)="applyFilters()">
+        <span class="material-symbols-outlined">filter_alt</span>
+        {{ lang() === 'ar' ? 'تطبيق' : 'Apply' }}
+      </button>
+      <button class="btn-reset" (click)="resetFilters()">
+        <span class="material-symbols-outlined">restart_alt</span>
+        {{ lang() === 'ar' ? 'إعادة تعيين' : 'Reset' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading()" class="loading">
+    <div class="spinner"></div>
+    {{ lang() === 'ar' ? 'جاري التحميل...' : 'Loading...' }}
+  </div>
+
+  <!-- Products Grid -->
+  <div *ngIf="!loading()" class="products-grid">
+    <div *ngFor="let product of products()" class="product-card">
+      <div class="product-image">
+        <img *ngIf="product.imageUrl || product.mainImage" 
+             [src]="product.imageUrl || product.mainImage" 
+             [alt]="product.title || product.name">
+        <div *ngIf="!product.imageUrl && !product.mainImage" class="no-image">
+          <span class="material-symbols-outlined">image</span>
+        </div>
+      </div>
+      <div class="product-info">
+        <h3 class="product-title">{{ product.title || product.name }}</h3>
+        <p class="product-price">{{ product.price | currency }}</p>
+        <a [routerLink]="['/product', product.id || product.productId]" class="btn-view">
+          {{ lang() === 'ar' ? 'عرض التفاصيل' : 'View Details' }}
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading() && products().length === 0" class="empty-state">
+    <span class="material-symbols-outlined">inventory_2</span>
+    <p>{{ lang() === 'ar' ? 'لا توجد منتجات' : 'No products found' }}</p>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="products().length > 0" class="pagination">
+    <button [disabled]="filters().pageNumber <= 1" (click)="prevPage()">
+      <span class="material-symbols-outlined">chevron_left</span>
+      {{ lang() === 'ar' ? 'السابق' : 'Previous' }}
+    </button>
+    <span class="page-number">{{ filters().pageNumber }}</span>
+    <button [disabled]="products().length < filters().pageSize" (click)="nextPage()">
+      {{ lang() === 'ar' ? 'التالي' : 'Next' }}
+      <span class="material-symbols-outlined">chevron_right</span>
+    </button>
+  </div>
+</div>

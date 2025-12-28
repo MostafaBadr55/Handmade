@@ -1,0 +1,25 @@
+<div class="manage-container">
+  <div class="manage-header">
+    <h1>{{ 'shop.manageShop' | t }}</h1>
+    <div class="actions">
+      <button class="btn btn-primary" (click)="addProduct()">{{ 'product.addProduct' | t }}</button>
+      <button class="btn btn-secondary" (click)="manageCategories()">{{ 'shop.manageCategories' | t }}</button>
+      <button class="btn btn-secondary" (click)="manageSubCategories()">{{ 'shop.manageSubCategories' | t }}</button>
+    </div>
+  </div>
+
+  <div class="products-section">
+    <h2>{{ 'product.activeProducts' | t }}</h2>
+    <div class="product-list">
+      <!-- Loop through active products -->
+    </div>
+  </div>
+
+  <div class="products-section">
+    <h2>{{ 'product.inactiveProducts' | t }}</h2>
+    <div class="product-list">
+      <!-- Loop through inactive products -->
+    </div>
+  </div>
+</div>
+

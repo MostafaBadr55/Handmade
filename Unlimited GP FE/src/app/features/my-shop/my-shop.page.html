@@ -1,0 +1,268 @@
+<div class="my-shop-page">
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="loading()">
+    <div class="spinner"></div>
+    <p>{{ 'common.loading' | t }}</p>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-state" *ngIf="!loading() && serverError()">
+    <span class="material-symbols-outlined">error</span>
+    <p>{{ serverError() }}</p>
+    <button class="btn-primary" (click)="load()">{{ 'common.tryAgain' | t }}</button>
+  </div>
+
+  <!-- No Shop - Create Shop -->
+  <div class="no-shop-state" *ngIf="!loading() && !serverError() && !shop()">
+    <div class="create-shop-card">
+      <div class="create-shop-icon">
+        <span class="material-symbols-outlined">add_business</span>
+      </div>
+      <h2>{{ 'shop.createYourShop' | t }}</h2>
+      <p>{{ 'shop.noShopYet' | t }}</p>
+      <button class="btn-create-shop" (click)="createShop()">
+        <span class="material-symbols-outlined">storefront</span>
+        {{ 'shop.createNewShop' | t }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Pending Shop -->
+  <div class="pending-state" *ngIf="!loading() && shop() && isPending()">
+    <div class="pending-card">
+      <div class="pending-icon">
+        <span class="material-symbols-outlined">hourglass_top</span>
+      </div>
+      <h2>{{ 'shop.pendingApproval' | t }}</h2>
+      <p>{{ 'shop.pendingMessage' | t }}</p>
+      <div class="shop-preview">
+        <h4>{{ 'shop.shopDetails' | t }}</h4>
+        <div class="shop-preview-content">
+          <div class="shop-preview-image" *ngIf="shop()?.imageUrl">
+            <img [src]="shop()?.imageUrl" alt="Shop Image">
+          </div>
+          <div class="shop-preview-info">
+            <p><strong>{{ 'common.name' | t }}:</strong> {{ shop()?.shopName || shop()?.name }}</p>
+            <p><strong>{{ 'common.description' | t }}:</strong> {{ shop()?.description || '-' }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rejected Shop -->
+  <div class="rejected-state" *ngIf="!loading() && shop() && isRejected()">
+    <div class="rejected-card">
+      <div class="rejected-icon">
+        <span class="material-symbols-outlined">block</span>
+      </div>
+      <h2>{{ 'shop.rejected' | t }}</h2>
+      <div class="rejection-reason">
+        <span class="material-symbols-outlined">info</span>
+        <div>
+          <strong>{{ 'shop.rejectionReason' | t }}</strong>
+          <p>{{ shop()?.rejectionMessage || ('shop.noReasonProvided' | t) }}</p>
+        </div>
+      </div>
+      <p class="rejection-help">{{ 'shop.rejectionHelp' | t }}</p>
+      <button class="btn-edit-shop" (click)="openEditModal()">
+        <span class="material-symbols-outlined">edit</span>
+        {{ 'shop.editShop' | t }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Active Shop Dashboard -->
+  <div class="shop-dashboard" *ngIf="!loading() && shop() && isActive()">
+    <!-- Shop Header -->
+    <div class="shop-header">
+      <div class="shop-info">
+        <div class="shop-image" *ngIf="shop()?.imageUrl">
+          <img [src]="shop()?.imageUrl" alt="Shop Image">
+        </div>
+        <div class="shop-details">
+          <h1>{{ shop()?.shopName || shop()?.name }}</h1>
+          <p class="shop-description">{{ shop()?.description }}</p>
+          <span class="shop-status active">
+            <span class="material-symbols-outlined">check_circle</span>
+            {{ 'common.active' | t }}
+          </span>
+        </div>
+      </div>
+      <button class="btn-edit" (click)="openEditModal()">
+        <span class="material-symbols-outlined">edit</span>
+        {{ 'shop.editShop' | t }}
+      </button>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="material-symbols-outlined">inventory_2</span>
+        <div class="stat-info">
+          <span class="stat-value">{{ products().length }}</span>
+          <span class="stat-label">{{ 'product.totalProducts' | t }}</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <span class="material-symbols-outlined">check_circle</span>
+        <div class="stat-info">
+          <span class="stat-value">{{ activeProducts().length }}</span>
+          <span class="stat-label">{{ 'product.activeProducts' | t }}</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <span class="material-symbols-outlined">pause_circle</span>
+        <div class="stat-info">
+          <span class="stat-value">{{ inactiveProducts().length }}</span>
+          <span class="stat-label">{{ 'product.inactiveProducts' | t }}</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <span class="material-symbols-outlined">pending</span>
+        <div class="stat-info">
+          <span class="stat-value">{{ pendingProducts().length }}</span>
+          <span class="stat-label">{{ 'product.pendingApproval' | t }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Products Section -->
+    <div class="products-section">
+      <div class="section-header">
+        <h2>{{ 'product.myProducts' | t }}</h2>
+        <div class="section-actions">
+          <button class="btn-add" (click)="openAddProduct()">
+            <span class="material-symbols-outlined">add</span>
+            {{ 'product.addProduct' | t }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Product Tabs -->
+      <div class="product-tabs">
+        <button [class.active]="productTab() === 'all'" (click)="setProductTab('all')">
+          {{ 'common.all' | t }} ({{ products().length }})
+        </button>
+        <button [class.active]="productTab() === 'active'" (click)="setProductTab('active')">
+          {{ 'common.active' | t }} ({{ activeProducts().length }})
+        </button>
+        <button [class.active]="productTab() === 'inactive'" (click)="setProductTab('inactive')">
+          {{ 'common.inactive' | t }} ({{ inactiveProducts().length }})
+        </button>
+        <button [class.active]="productTab() === 'pending'" (click)="setProductTab('pending')">
+          {{ 'common.pending' | t }} ({{ pendingProducts().length }})
+        </button>
+      </div>
+
+      <!-- Products Grid -->
+      <div class="products-grid" *ngIf="displayedProducts().length > 0">
+        <div class="product-card" *ngFor="let product of displayedProducts()">
+          <div class="product-image">
+            <img [src]="product.images?.[0]?.url || product.imageUrl || 'assets/placeholder.png'" [alt]="product.title || product.name">
+            <span class="product-status" [ngClass]="(product.approvalStatus || product.status || 'active').toLowerCase()">
+              {{ product.approvalStatus || product.status || 'Active' }}
+            </span>
+          </div>
+          <div class="product-info">
+            <h3>{{ product.title || product.name || 'Untitled' }}</h3>
+            <p class="product-price">{{ product.price | currency:'USD' }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty Products -->
+      <div class="empty-products" *ngIf="displayedProducts().length === 0">
+        <span class="material-symbols-outlined">inventory_2</span>
+        <p>{{ 'product.noProducts' | t }}</p>
+        <button class="btn-add" (click)="openAddProduct()">
+          <span class="material-symbols-outlined">add</span>
+          {{ 'product.addFirstProduct' | t }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Shop Modal -->
+  <div class="modal-overlay" *ngIf="showEditModal()">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>{{ 'shop.editShop' | t }}</h3>
+        <button class="close-btn" (click)="closeEditModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>{{ 'shop.shopName' | t }}</label>
+          <input type="text" [ngModel]="editForm().shopName" (ngModelChange)="setEditField('shopName', $event)">
+        </div>
+        <div class="form-group">
+          <label>{{ 'common.description' | t }}</label>
+          <textarea [ngModel]="editForm().description" (ngModelChange)="setEditField('description', $event)" rows="4"></textarea>
+        </div>
+        <div class="form-group">
+          <label>{{ 'shop.shopImage' | t }}</label>
+          <input type="file" accept="image/*" (change)="onEditFileChange($event)">
+          <div class="image-preview" *ngIf="editForm().imageUrl && editForm().imageUrl.length > 0">
+            <img [src]="editForm().imageUrl" alt="Preview">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeEditModal()">{{ 'common.cancel' | t }}</button>
+        <button class="btn-primary" (click)="submitEdit()">{{ 'shop.saveChanges' | t }}</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Product Modal -->
+  <div class="modal-overlay" *ngIf="showAddProductModal()">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3>{{ 'product.addNewProduct' | t }}</h3>
+        <button class="close-btn" (click)="closeAddProductModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label>{{ 'product.productTitle' | t }} *</label>
+            <input type="text" [ngModel]="addProductForm().title" (ngModelChange)="setAddProductField('title', $event)" [placeholder]="i18n.t('product.enterTitle')">
+          </div>
+          <div class="form-group">
+            <label>{{ 'common.price' | t }} *</label>
+            <input type="number" [ngModel]="addProductForm().price" (ngModelChange)="setAddProductField('price', $event)" placeholder="0.00">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>{{ 'product.category' | t }} *</label>
+            <select [ngModel]="addProductForm().categoryId" (ngModelChange)="setAddProductField('categoryId', $event); onCategoryChange($event)">
+              <option value="">{{ 'product.selectCategory' | t }}</option>
+              <option *ngFor="let c of categories()" [value]="c.id">{{ lang() === 'ar' ? c.nameAr : c.nameEn }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>{{ 'product.subcategory' | t }} *</label>
+            <select [ngModel]="addProductForm().subCategoryId" (ngModelChange)="setAddProductField('subCategoryId', $event)" [disabled]="!addProductForm().categoryId">
+              <option value="">{{ 'product.selectSubcategory' | t }}</option>
+              <option *ngFor="let s of subCategories()" [value]="s.id">{{ lang() === 'ar' ? s.nameAr : s.nameEn }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>{{ 'product.productImage' | t }}</label>
+          <input type="file" accept="image/*" (change)="onAddProductFileChange($event)">
+          <div class="image-preview" *ngIf="addProductForm().imageUrl && addProductForm().imageUrl.length > 0">
+            <img [src]="addProductForm().imageUrl" alt="Preview">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeAddProductModal()">{{ 'common.cancel' | t }}</button>
+        <button class="btn-primary" (click)="submitAddProduct()" [disabled]="isAddingProduct()">
+          <span *ngIf="isAddingProduct()" class="spinner-sm"></span>
+          {{ isAddingProduct() ? ('product.adding' | t) : ('product.addProduct' | t) }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
