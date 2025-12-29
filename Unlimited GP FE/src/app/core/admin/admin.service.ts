@@ -16,6 +16,16 @@ export interface GetShopsParams {
   pageSize?: number;
 }
 
+export interface adminShopModel {
+  id: number;
+  ownerUserId: number;
+  name: string;
+  description: string;
+  imageUrl: string;
+  status: 'Active' | 'Inactive' | 'Pending' | 'Suspended' | 'Rejected';
+  ratingAverage: number;
+}
+
 export interface GetProductsParams {
   ShopId?: number;
   Status?: 'Active' | 'InActive';

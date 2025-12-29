@@ -2,7 +2,7 @@ import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { AdminService } from '../../core/admin/admin.service';
+import { AdminService, adminShopModel } from '../../core/admin/admin.service';
 import { FilesService } from '../../core/files/files.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { TPipe } from '../../core/i18n/t.pipe';
@@ -27,8 +27,8 @@ export class AdminDashboardPage {
   success = signal<string | null>(null);
 
   // Shops
-  shops = signal<any[]>([]);
-  pendingShops = signal<any[]>([]);
+  shops = signal<adminShopModel[]>([]);
+  pendingShops = signal<adminShopModel[]>([]);
   shopFilters = signal({
     Status: '',
     Name: '',
@@ -124,7 +124,15 @@ export class AdminDashboardPage {
     });
   }
 
-  approveShop(shopId: number) {
+  approveShop(shopId: number)
+  {
+    console.log('approveShop called with', shopId);
+    if (!shopId)
+      {
+      this.error.set('Invalid shop id');
+      return;
+      }
+
     this.adminService.approveShop(shopId).subscribe({
       next: () => {
         this.success.set('Shop approved successfully!');
@@ -244,14 +252,14 @@ export class AdminDashboardPage {
       return;
     }
 
-    const payload = { 
-      name: form.name, 
-      description: form.description, 
+    const payload = {
+      name: form.name,
+      description: form.description,
       imageUrl: form.imageUrl,
       ...(form.id ? { id: form.id } : {})
     };
 
-    const action = this.editingCategory() 
+    const action = this.editingCategory()
       ? this.adminService.updateCategory(payload)
       : this.adminService.createCategory(payload);
 
@@ -277,7 +285,7 @@ export class AdminDashboardPage {
 
   deleteCategory(id: number) {
     if (!confirm('Are you sure you want to delete this category?')) return;
-    
+
     this.adminService.deleteCategory(id).subscribe({
       next: () => {
         this.success.set('Category deleted!');
@@ -319,8 +327,8 @@ export class AdminDashboardPage {
       return;
     }
 
-    const payload = { 
-      name: form.name, 
+    const payload = {
+      name: form.name,
       categoryId: form.categoryId,
       ...(form.id ? { id: form.id } : {})
     };

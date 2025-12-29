@@ -16,13 +16,13 @@ export class CatalogService {
     );
   }
 
-  getCategoryById(categoryId: string): Observable<Category | null> {
+  getCategoryById(categoryId: number): Observable<Category | null> {
     return this.http.get<any>(`${this.baseUrl}/api/Category/${categoryId}`).pipe(
         map(item => this.mapCategory(item))
     );
   }
 
-  getSubCategories(categoryId: string): Observable<SubCategory[]> {
+  getSubCategories(categoryId: number): Observable<SubCategory[]> {
     return this.http.get<any[]>(`${this.baseUrl}/api/SubCategories/GetallSubCategoryByCategoryId`, {
         params: { categoryId }
     }).pipe(
@@ -62,7 +62,7 @@ export class CatalogService {
       return {
           id: item.id || item.categoryId,
           nameEn: item.name || item.nameEn,
-          nameAr: item.name || item.nameAr, 
+          nameAr: item.name || item.nameAr,
           imageUrl: item.imageUrl
       };
   }

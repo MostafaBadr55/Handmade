@@ -1,12 +1,12 @@
 export interface Category {
-  id: string;
+  id: number;
   nameAr: string;
   nameEn: string;
   imageUrl?: string;
 }
 
 export interface SubCategory {
-  id: string;
+  id: number;
   categoryId: string;
   nameAr: string;
   nameEn: string;

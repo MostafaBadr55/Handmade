@@ -21,21 +21,31 @@ export class SubCategoriesPage {
 
   protected readonly lang = computed(() => this.i18n.lang());
 
-  private readonly categoryId$ = this.route.paramMap.pipe(
-    map((p) => p.get('categoryId') ?? ''),
-    map((id) => id.trim())
-  );
+ private readonly categoryId$ = this.route.paramMap.pipe(
+  map(p => Number(p.get('categoryId'))),
+  // Optional but highly recommended safety check
+  map(id => {
+    if (Number.isNaN(id)) {
+      throw new Error('Invalid categoryId');
+    }
+    return id;
+  })
+);
 
-  protected readonly vm$ = this.categoryId$.pipe(
-    switchMap((categoryId) =>
-      combineLatest([
-        this.catalog.getCategoryById(categoryId),
-        this.catalog.getSubCategories(categoryId)
-      ]).pipe(
-        map(([category, subCategories]) => ({ categoryId, category, subCategories }))
-      )
+ protected readonly vm$ = this.categoryId$.pipe(
+  switchMap((categoryId) =>
+    combineLatest([
+      this.catalog.getCategoryById(categoryId),
+      this.catalog.getSubCategories(categoryId)
+    ]).pipe(
+      map(([category, subCategories]) => ({
+        categoryId,
+        category,
+        subCategories
+      }))
     )
-  );
+  )
+);
 
   protected back(): void {
     this.router.navigate(['/']);

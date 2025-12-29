@@ -1,0 +1,83 @@
+<div class="add-product-container">
+      <div class="form-card">
+        <div class="form-header">
+          <button class="back-btn" (click)="cancel()">
+            <span class="material-symbols-outlined">arrow_back</span>
+          </button>
+          <h2>{{ isEdit() ? (lang() === 'ar' ? 'تعديل المنتج' : 'Edit Product') : (lang() === 'ar' ? 'إضافة منتج جديد' : 'Add New Product') }}</h2>
+        </div>
+
+        <form (ngSubmit)="submit()" #productForm="ngForm">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>{{ lang() === 'ar' ? 'العنوان' : 'Title' }}</label>
+              <input name="title" [(ngModel)]="form.title" required #title="ngModel"
+                     [placeholder]="lang() === 'ar' ? 'أدخل عنوان المنتج' : 'Enter product title'" />
+              <div *ngIf="title.invalid && title.touched" class="error-text">
+                {{ lang() === 'ar' ? 'العنوان مطلوب' : 'Title is required' }}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>{{ lang() === 'ar' ? 'السعر' : 'Price' }}</label>
+              <div class="price-input">
+                <span class="currency">$</span>
+                <input type="number" name="price" [(ngModel)]="form.price" required min="0.01" #price="ngModel" />
+              </div>
+              <div *ngIf="price.invalid && price.touched" class="error-text">
+                {{ lang() === 'ar' ? 'السعر مطلوب ويجب أن يكون أكبر من 0' : 'Price is required and must be greater than 0' }}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>{{ lang() === 'ar' ? 'الفئة' : 'Category' }}</label>
+              <select name="categoryId" [(ngModel)]="form.categoryId" (change)="onCategoryChange()" required #cat="ngModel">
+                <option value="">{{ lang() === 'ar' ? 'اختر الفئة' : 'Select Category' }}</option>
+                <option *ngFor="let c of categories()" [ngValue]="c.id">
+              </select>
+              <div *ngIf="cat.invalid && cat.touched" class="error-text">
+                {{ lang() === 'ar' ? 'الفئة مطلوبة' : 'Category is required' }}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>{{ lang() === 'ar' ? 'الفئة الفرعية' : 'Subcategory' }}</label>
+              <select name="subCategoryId" [(ngModel)]="form.subCategoryId" required #subCat="ngModel" [disabled]="!form.categoryId">
+                <option value="">{{ lang() === 'ar' ? 'اختر الفئة الفرعية' : 'Select Subcategory' }}</option>
+                <option *ngFor="let s of subCategories()" [ngValue]="s.id">
+              </select>
+              <div *ngIf="subCat.invalid && subCat.touched" class="error-text">
+                {{ lang() === 'ar' ? 'الفئة الفرعية مطلوبة' : 'Subcategory is required' }}
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group full-width">
+            <label>{{ lang() === 'ar' ? 'الصورة' : 'Image' }}</label>
+            <div class="image-input-group">
+              <input type="file" accept="image/*" (change)="onFileChange($event)" class="form-input" />
+              <input name="imageUrl" [(ngModel)]="form.imageUrl" required #img="ngModel" style="display:none" />
+              <div class="image-preview" *ngIf="form.imageUrl && form.imageUrl.length > 0">
+                <img [src]="form.imageUrl" alt="Preview" (error)="form.imageUrl = ''" />
+              </div>
+              <div *ngIf="uploadInProgress()" class="image-preview">
+                <div class="spinner"></div>
+              </div>
+            </div>
+            <div *ngIf="img.invalid && img.touched" class="error-text">
+              {{ lang() === 'ar' ? 'الصورة مطلوبة' : 'Image is required' }}
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="cancel-btn" (click)="cancel()">
+              {{ lang() === 'ar' ? 'إلغاء' : 'Cancel' }}
+            </button>
+            <button type="submit" class="submit-btn" [disabled]="productForm.invalid || loading()">
+              <span *ngIf="!loading()">{{ isEdit() ? (lang() === 'ar' ? 'تحديث' : 'Update') : (lang() === 'ar' ? 'إنشاء' : 'Create') }}</span>
+              <span *ngIf="loading()" class="spinner"></span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>

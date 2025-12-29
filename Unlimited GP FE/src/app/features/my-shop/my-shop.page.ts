@@ -32,22 +32,22 @@ export class MyShopPage {
   protected readonly categories = signal<Category[]>([]);
   protected readonly subCategories = signal<SubCategory[]>([]);
   protected readonly products = signal<any[]>([]);
-  
+
   // Product tabs
   protected readonly productTab = signal<ProductTabType>('all');
-  
+
   // Product filters
-  protected readonly activeProducts = computed(() => 
-    this.products().filter(p => (p.status || '').toString().toLowerCase() === 'active' && 
+  protected readonly activeProducts = computed(() =>
+    this.products().filter(p => (p.status || '').toString().toLowerCase() === 'active' &&
       (p.approvalStatus || 'Approved').toString().toLowerCase() === 'approved')
   );
-  protected readonly inactiveProducts = computed(() => 
+  protected readonly inactiveProducts = computed(() =>
     this.products().filter(p => (p.status || '').toString().toLowerCase() === 'inactive')
   );
-  protected readonly pendingProducts = computed(() => 
+  protected readonly pendingProducts = computed(() =>
     this.products().filter(p => (p.approvalStatus || '').toString().toLowerCase() === 'pending')
   );
-  
+
   protected readonly displayedProducts = computed(() => {
     const tab = this.productTab();
     switch (tab) {
@@ -173,7 +173,7 @@ export class MyShopPage {
     this.showAddProductModal.set(false);
   }
 
-  onCategoryChange(categoryId: string) {
+  onCategoryChange(categoryId: number) {
     if (categoryId) {
       this.catalogService.getSubCategories(categoryId).subscribe({
         next: (subs) => this.subCategories.set(subs)

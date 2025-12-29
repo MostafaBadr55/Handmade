@@ -51,7 +51,7 @@ export class ProductsPage implements OnInit {
       this.subCategories.set([]);
       return;
     }
-    this.catalogService.getSubCategories(String(categoryId)).subscribe({
+    this.catalogService.getSubCategories(categoryId).subscribe({
       next: (res) => this.subCategories.set(res || []),
       error: () => this.subCategories.set([])
     });

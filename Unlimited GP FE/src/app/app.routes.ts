@@ -79,13 +79,13 @@ export const appRoutes: Routes = [
     canActivate: [RoleGuard],
     data: { roles: ['Admin', 'SuperAdmin', 'Super Admin'] }
   },
-  {
-    path: 'admin/shops/pending',
-    loadComponent: () => import('./features/admin-pending-shops/admin-pending-shops.page').then((m) => m.AdminPendingShopsPage),
-    title: 'Pending Shops - Admin',
-    canActivate: [RoleGuard],
-    data: { roles: ['Admin', 'SuperAdmin', 'Super Admin'] }
-  },
+  // {
+  //   path: 'admin/shops/pending',
+  //   loadComponent: () => import('./features/admin-pending-shops/admin-pending-shops.page').then((m) => m.AdminPendingShopsPage),
+  //   title: 'Pending Shops - Admin',
+  //   canActivate: [RoleGuard],
+  //   data: { roles: ['Admin', 'SuperAdmin', 'Super Admin'] }
+  // },
   {
     path: 'admin/products/pending',
     loadComponent: () => import('./features/admin-products-pending/admin-products-pending.page').then((m) => m.AdminProductsPendingPage),

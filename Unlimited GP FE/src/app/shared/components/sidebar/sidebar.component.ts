@@ -29,20 +29,20 @@ export class SidebarComponent {
   isSeller = computed(() => this.tokenService.hasRole('Seller'));
   isAdmin = computed(() => this.tokenService.hasRole('Admin') || this.tokenService.hasRole('SuperAdmin'));
   lang = computed(() => this.i18n.lang());
-  
+
   // Profile link - sellers go to my-shop, buyers go to profile
   profileLink = computed(() => {
     if (this.isAdmin()) return '/admin';
     if (this.isSeller()) return '/my-shop';
     return '/profile';
   });
-  
+
   categories = toSignal(this.catalogService.getCategories().pipe(
     catchError(() => of([]))
   ), { initialValue: [] as Category[] });
 
   showMenu = signal(false);
-  expandedCategoryId = signal<string | number | null>(null);
+  expandedCategoryId = signal< number | null>(null);
   subCategories = signal<SubCategory[]>([]);
 
   toggleMenu() {
@@ -58,18 +58,18 @@ export class SidebarComponent {
     this.i18n.setLang(newLang);
   }
 
-  toggleCategory(categoryId: string | number) {
-    if (this.expandedCategoryId() === categoryId) {
-      this.expandedCategoryId.set(null);
-      this.subCategories.set([]);
-    } else {
-      this.expandedCategoryId.set(categoryId);
-      this.catalogService.getSubCategories(String(categoryId)).subscribe({
-        next: (subs) => this.subCategories.set(subs),
-        error: () => this.subCategories.set([])
-      });
-    }
+  toggleCategory(categoryId: number) {
+  if (this.expandedCategoryId() === categoryId) {
+    this.expandedCategoryId.set(null);
+    this.subCategories.set([]);
+  } else {
+    this.expandedCategoryId.set(categoryId);
+    this.catalogService.getSubCategories(categoryId).subscribe({
+      next: subs => this.subCategories.set(subs),
+      error: () => this.subCategories.set([])
+    });
   }
+}
 
   logout() {
     this.tokenService.setToken(null);
