@@ -26,6 +26,26 @@ export interface adminShopModel {
   ratingAverage: number;
 }
 
+export interface AdminProductImageModel {
+  id: number;
+  url: string;
+  altText: string;
+  sortOrder: number;
+  isPrimary: boolean;
+}
+export interface AdminProductsModel {
+  id: number;
+  shopId: number;
+  sku: string;
+  isPublished: boolean;
+  title: string;
+  price: number;
+  status: 'Active' | 'InActive'; // or string if status is not fixed
+  approvalStatus: 'Pending' | 'Approved' | 'Rejected';
+  images: AdminProductImageModel[];
+}
+
+
 export interface GetProductsParams {
   ShopId?: number;
   Status?: 'Active' | 'InActive';

@@ -181,6 +181,7 @@
         <table>
           <thead>
             <tr>
+              <th>{{ 'common.image' | t }}</th>
               <th>{{ 'admin.title' | t }}</th>
               <th>{{ 'common.price' | t }}</th>
               <th>{{ 'common.status' | t }}</th>
@@ -190,15 +191,20 @@
           </thead>
           <tbody>
             <tr *ngFor="let product of products()">
-              <td>{{ product.title || product.name }}</td>
+              <td>
+                <div class="table-image" *ngIf="(product.images && product.images.length > 0)">
+                  <img [src]="product.images[0]?.url" alt="Product image" />
+                </div>
+              </td>
+              <td>{{ product.title }}</td>
               <td>{{ product.price | currency }}</td>
               <td><span class="badge" [ngClass]="product.status?.toLowerCase()">{{ product.status }}</span></td>
               <td><span class="badge" [ngClass]="product.approvalStatus?.toLowerCase()">{{ product.approvalStatus }}</span></td>
               <td class="actions">
-                <button *ngIf="product.approvalStatus !== 'Approved'" class="btn-approve" (click)="approveProduct(product.id || product.productId)">
+                <button *ngIf="product.approvalStatus !== 'Approved'" class="btn-approve" (click)="approveProduct(product.id)">
                   <span class="material-symbols-outlined">check</span>
                 </button>
-                <button *ngIf="product.approvalStatus !== 'Rejected'" class="btn-reject" (click)="openRejectProductModal(product.id || product.productId)">
+                <button *ngIf="product.approvalStatus !== 'Rejected'" class="btn-reject" (click)="openRejectProductModal(product.id)">
                   <span class="material-symbols-outlined">close</span>
                 </button>
               </td>

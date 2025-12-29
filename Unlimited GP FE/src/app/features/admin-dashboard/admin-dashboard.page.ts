@@ -2,7 +2,7 @@ import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { AdminService, adminShopModel } from '../../core/admin/admin.service';
+import { AdminProductsModel, AdminService, adminShopModel } from '../../core/admin/admin.service';
 import { FilesService } from '../../core/files/files.service';
 import { I18nService } from '../../core/i18n/i18n.service';
 import { TPipe } from '../../core/i18n/t.pipe';
@@ -37,7 +37,7 @@ export class AdminDashboardPage {
   });
 
   // Products
-  products = signal<any[]>([]);
+  products = signal<AdminProductsModel[]>([]);
   productFilters = signal({
     ApprovalStatus: '' as '' | 'Pending' | 'Approved' | 'Rejected',
     Status: '' as '' | 'Active' | 'InActive',
